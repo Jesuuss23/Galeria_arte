@@ -38,6 +38,15 @@
 
         html { scroll-behavior: smooth; }
 
+        /* Asegura que los mensajes ocultos del filtro no se vean */
+        .hidden { display: none !important; }
+
+        /* Textos largos sin espacios (ej. "dddddd...") se parten en lugar de desbordar */
+        .glass p, .glass h1, .glass h3, .chip { overflow-wrap: anywhere; word-break: break-word; }
+        .comentario-item { min-width: 0; }
+        .comentario-item p { white-space: pre-line; } /* respeta los saltos de línea del comentario */
+        .chip { max-width: 100%; }
+
         body {
             background: var(--bg);
             color: var(--text);
@@ -312,6 +321,35 @@
                 </div>
             </div>
 
+            <!-- Formulario para publicar comentario -->
+            @auth
+                <form action="{{ route('obras.comentar', $obra->id) }}" method="POST" class="mb-6 p-4 rounded-2xl" style="background: rgba(0,0,0,0.3); border: 1px solid var(--line);">
+                    @csrf
+                    <div class="flex flex-col sm:flex-row gap-3 mb-3">
+                        <div class="sm:w-1/3">
+                            <label class="eyebrow block mb-1.5">Tipo de aporte</label>
+                            <select name="tipo" class="w-full bg-[#12121e] text-sm text-gray-200 rounded-xl px-3.5 py-2.5 border border-white/10 focus:outline-none focus:border-violet-500 transition">
+                                <option value="positiva">✨ Reseña positiva</option>
+                                <option value="critica">💡 Crítica constructiva</option>
+                                <option value="pregunta">❓ Pregunta</option>
+                            </select>
+                        </div>
+                        <div class="sm:w-2/3">
+                            <label class="eyebrow block mb-1.5">Tu comentario</label>
+                            <textarea name="comentario" id="comentario-input" rows="1" required placeholder="Escribe tu opinión sobre esta obra..." class="w-full bg-[#12121e] text-sm text-gray-200 placeholder-gray-500 rounded-xl px-4 py-2.5 border border-white/10 focus:outline-none focus:border-violet-500 transition block" style="resize: none; overflow-y: hidden; min-height: 2.75rem; max-height: 16rem; overflow-wrap: anywhere; word-break: break-word;"></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="text-xs font-semibold px-5 py-2.5 rounded-xl text-white bg-gradient-to-r from-violet-600 to-pink-600 hover:opacity-90 transition shadow-lg shadow-violet-500/20">
+                            Publicar comentario
+                        </button>
+                    </div>
+                </form>
+            @else
+                <div class="mb-6 p-4 rounded-2xl text-center text-sm" style="background: rgba(0,0,0,0.25); border: 1px dashed var(--line); color: var(--muted);">
+                    <a href="{{ route('login') }}" class="text-violet-400 font-semibold hover:underline">Inicia sesión</a> para dejar una crítica, reseña o pregunta.
+                </div>
+            @endauth
             <!-- Contenedor de Comentarios -->
             <div class="space-y-3" id="contenedor-comentarios">
                 @forelse ($obra->comentarios as $c)
@@ -370,6 +408,24 @@
 
         </div>
     </div>
+
+    <!-- La caja de comentario crece hacia abajo mientras escribes -->
+    <script>
+        (function () {
+            const ta = document.getElementById('comentario-input');
+            if (!ta) return;
+            const grow = () => {
+                ta.style.height = 'auto';
+                ta.style.height = ta.scrollHeight + 'px';
+                ta.style.overflowY = ta.scrollHeight > ta.clientHeight + 2 && ta.scrollHeight >= 256 ? 'auto' : 'hidden';
+            };
+            ta.addEventListener('input', grow);
+            ta.addEventListener('keydown', e => {
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); ta.form.requestSubmit(); }
+            });
+            grow();
+        })();
+    </script>
 
     <!-- Efecto 3D / brillo sobre la imagen -->
     <script>

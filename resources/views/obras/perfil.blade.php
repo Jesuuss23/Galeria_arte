@@ -38,6 +38,17 @@
 
         html { scroll-behavior: smooth; }
 
+        /* Textos largos sin espacios se parten en lugar de desbordar */
+        .comentario p, .comentario span, .obra h3, .glass h1, .glass p, .tag, .likes {
+            overflow-wrap: anywhere; word-break: break-word; min-width: 0; max-width: 100%;
+        }
+        .comentario { min-width: 0; max-width: 100%; }
+        /* Los paneles flex deben poder encogerse; si no, el texto largo los ensancha */
+        .obra > div { min-width: 0; }
+        .obra > div > div { min-width: 0; }
+        .feedback { overflow-x: hidden; min-width: 0; }
+        .feedback .comentario > div:first-child > span:first-child { min-width: 0; flex: 1 1 auto; }
+
         body {
             background: var(--bg);
             color: var(--text);
