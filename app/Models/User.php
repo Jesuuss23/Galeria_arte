@@ -7,7 +7,8 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
+use App\Models\Servicio;
+use App\Models\Pedido;
 class User extends Authenticatable
 {
     public $timestamps = false;
@@ -53,5 +54,25 @@ class User extends Authenticatable
     public function nombreVisible()
     {
         return $this->es_anonimo ? 'Anónimo' : $this->name;
+    }
+    public function servicios()
+    {
+        return $this->hasMany(Servicio::class, 'user_id');
+    }
+
+    public function pedidosComoCliente()
+    {
+        return $this->hasMany(Pedido::class, 'cliente_id');
+    }
+
+    public function pedidosComoArtista()
+    {
+        return $this->hasMany(Pedido::class, 'artista_id');
+    }
+
+    // Escopo para listar artistas disponíveis para contratação
+    public function scopeArtistasDisponibles($query)
+    {
+        return $query->where('es_publico', true);
     }
 }

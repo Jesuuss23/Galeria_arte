@@ -47,6 +47,40 @@
         .comentario-item p { white-space: pre-line; } /* respeta los saltos de línea del comentario */
         .chip { max-width: 100%; }
 
+        /* ---------- Encargo personalizado ---------- */
+        .btn-hire {
+            display: inline-flex; align-items: center; gap: .5rem; cursor: pointer;
+            padding: .75rem 1.3rem; border-radius: .95rem; font-size: .88rem; font-weight: 600; color: #fff;
+            background: linear-gradient(120deg, var(--violet), var(--cyan));
+            box-shadow: 0 12px 30px -12px rgba(34, 211, 238, .7);
+            transition: transform .2s, box-shadow .2s;
+        }
+        .btn-hire:hover { transform: translateY(-3px); box-shadow: 0 18px 38px -12px rgba(34, 211, 238, .85); }
+        .btn-hire:active { transform: scale(.97); }
+        .hire-panel { padding: 1.2rem; border-radius: 1.2rem; background: rgba(0,0,0,.3); border: 1px solid var(--line); }
+        .hire-field {
+            width: 100%; padding: .75rem .95rem; border-radius: .9rem; font-size: .88rem; color: var(--text);
+            background: rgba(0,0,0,.3); border: 1px solid var(--line);
+            transition: border-color .2s, box-shadow .2s, background .2s;
+        }
+        .hire-field::placeholder { color: #5f5f78; }
+        .hire-field:focus { outline: none; border-color: rgba(167,139,250,.7); box-shadow: 0 0 0 4px rgba(139,92,246,.18); background: rgba(0,0,0,.42); }
+        .hire-field::file-selector-button {
+            margin-right: .8rem; padding: .35rem .8rem; border: 0; border-radius: .6rem; cursor: pointer;
+            background: rgba(139,92,246,.25); color: #ddd6fe; font-weight: 600; font-size: .78rem;
+        }
+        .btn-hire-send {
+            width: 100%; padding: .8rem 1rem; border-radius: .95rem; font-size: .88rem; font-weight: 600; color: #fff; cursor: pointer;
+            background: linear-gradient(120deg, #10b981, #06b6d4);
+            box-shadow: 0 12px 28px -12px rgba(16,185,129,.8);
+            transition: transform .2s, box-shadow .2s;
+        }
+        .btn-hire-send:hover { transform: translateY(-2px); }
+        .alert { display: flex; gap: .6rem; padding: .8rem 1rem; border-radius: 1rem; font-size: .86rem; border: 1px solid; }
+        .alert-ok   { color: #6ee7b7; background: rgba(52,211,153,.08); border-color: rgba(52,211,153,.3); }
+        .alert-warn { color: #fcd34d; background: rgba(251,191,36,.08); border-color: rgba(251,191,36,.3); }
+        .alert-err  { color: #fda4af; background: rgba(244,63,94,.08);  border-color: rgba(244,63,94,.3); }
+
         body {
             background: var(--bg);
             color: var(--text);
@@ -249,10 +283,12 @@
                     <h1 class="font-display text-3xl sm:text-5xl font-bold tracking-tight leading-tight title-grad">{{ $obra->titulo }}</h1>
 
                     <div class="flex flex-wrap items-center gap-2 mt-4">
-                        <p class="flex items-center gap-2 text-sm" style="color: var(--muted);">
-                            <span class="avatar">{{ mb_strtoupper(mb_substr($obra->usuario ? $obra->usuario->nombreVisible() : 'Artista', 0, 1)) }}</span>
-                            <span>Publicado por <strong class="text-white font-semibold">{{ $obra->usuario ? $obra->usuario->nombreVisible() : 'Artista' }}</strong></span>
-                        </p>
+                    <p class="text-sm text-slate-400">
+                        Publicado por: 
+                        <a href="{{ route('perfil.artista', $obra->usuario_id) }}" class="text-violet-400 hover:text-violet-300 font-semibold underline">
+                            {{ $obra->usuario->nombreVisible() }}
+                        </a>
+                    </p>
 
                         @if($obra->usuario && !$obra->usuario->es_anonimo)
                             @if($obra->usuario->bio)
@@ -299,6 +335,65 @@
                             </span>
                         @endforeach
                     </div>
+                </div>
+            @endif
+
+            <!-- Mensajes del sistema -->
+            @if(session('success') || session('warning') || session('error') || $errors->any())
+                <div class="mt-6 space-y-3">
+                    @if(session('success'))
+                        <div class="alert alert-ok"><span>✅</span><span>{{ session('success') }}</span></div>
+                    @endif
+                    @if(session('warning'))
+                        <div class="alert alert-warn"><span>⚠️</span><span>{{ session('warning') }}</span></div>
+                    @endif
+                    @if(session('error'))
+                        <div class="alert alert-err"><span>⛔</span><span>{{ session('error') }}</span></div>
+                    @endif
+                    @if($errors->any())
+                        <div class="alert alert-err">
+                            <ul class="list-disc pl-5 space-y-0.5">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </div>
+            @endif
+
+            {{-- Encargo personalizado: solo si hay sesión, el visitante no es el autor y el artista acepta encargos --}}
+            @if(auth()->check() && $obra->usuario && auth()->id() !== $obra->usuario->id)
+                <div class="mt-6 pt-6" style="border-top: 1px solid var(--line);">
+                    @if($obra->usuario->es_publico)
+                        <button type="button" class="btn-hire" id="btn-encargo" aria-controls="formularioEncargo" aria-expanded="false">
+                            ✉️ Solicitar Encargo Personalizado
+                        </button>
+
+                        <div class="hire-panel mt-4 {{ ($errors->has('instrucciones') || $errors->has('archivo_referencia')) ? '' : 'hidden' }}" id="formularioEncargo">
+                            <form action="{{ route('pedidos.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                                @csrf
+                                <input type="hidden" name="artista_id" value="{{ $obra->usuario->id }}">
+
+                                <div>
+                                    <label class="eyebrow block mb-1.5">Instrucciones y especificaciones del proyecto</label>
+                                    <textarea name="instrucciones" rows="3" class="hire-field" style="resize: vertical;" placeholder="Describe estilo, dimensiones, paleta de colores, referencias..." required>{{ old('instrucciones') }}</textarea>
+                                </div>
+
+                                <div>
+                                    <label class="eyebrow block mb-1.5">Imágenes o archivo de referencia (opcional)</label>
+                                    <input type="file" name="archivo_referencia" class="hire-field">
+                                    <p class="text-xs mt-1.5" style="color: #66667f;">JPG, PNG, PDF o ZIP · Máx. 10MB</p>
+                                </div>
+
+                                <button type="submit" class="btn-hire-send">Enviar Solicitud al Artista</button>
+                            </form>
+                        </div>
+                    @else
+                        <div class="p-4 rounded-2xl text-sm" style="background: rgba(0,0,0,.25); border: 1px dashed var(--line); color: var(--muted);">
+                            Este artista tiene su perfil privado y no acepta nuevos encargos por el momento.
+                        </div>
+                    @endif
                 </div>
             @endif
 
@@ -408,6 +503,19 @@
 
         </div>
     </div>
+
+    <!-- Mostrar / ocultar el formulario de encargo (reemplaza data-bs-toggle de Bootstrap) -->
+    <script>
+        (function () {
+            const btn = document.getElementById('btn-encargo');
+            const panel = document.getElementById('formularioEncargo');
+            if (!btn || !panel) return;
+            btn.addEventListener('click', () => {
+                const oculto = panel.classList.toggle('hidden');
+                btn.setAttribute('aria-expanded', String(!oculto));
+            });
+        })();
+    </script>
 
     <!-- La caja de comentario crece hacia abajo mientras escribes -->
     <script>

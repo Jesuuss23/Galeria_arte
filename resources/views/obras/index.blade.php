@@ -244,7 +244,11 @@
         <a href="{{ route('obras.index') }}" class="logo text-xl">
             🎨 Galería Creativa
         </a>
-
+@if(auth()->check() && auth()->user()->es_admin)
+    <a href="{{ route('admin.dashboard') }}" class="btn-ghost border-violet-500/40 text-violet-300">
+        ⚡ Panel Admin
+    </a>
+@endif
         <div class="flex items-center gap-2 sm:gap-3">
             @auth
                 <!-- Perfil del usuario -->
@@ -252,6 +256,9 @@
                     <span class="dot-live"></span>
                     <span>{{ Auth::user()->name }}</span>
                 </a>
+
+                <!-- Contrataciones (Escrow) -->
+                <a href="{{ route('pedidos.index') }}" class="btn-ghost">Contrataciones</a>
 
                 <!-- Botón Subir Arte -->
                 <a href="{{ route('obras.create') }}" class="btn-primary">

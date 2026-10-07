@@ -37,7 +37,13 @@
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
-
+                        @auth
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('pedidos.index') }}">
+                                    Contrataciones
+                                </a>
+                            </li>
+                        @endauth
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
