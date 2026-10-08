@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Servicio;
 use App\Models\Pedido;
+use App\Models\Obra;
 class User extends Authenticatable
 {
     public $timestamps = false;
@@ -74,5 +75,9 @@ class User extends Authenticatable
     public function scopeArtistasDisponibles($query)
     {
         return $query->where('es_publico', true);
+    }
+    public function obras()
+    {
+        return $this->hasMany(Obra::class, 'usuario_id');
     }
 }

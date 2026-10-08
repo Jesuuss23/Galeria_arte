@@ -13,8 +13,8 @@ class PerfilController extends Controller
 {
 public function mostrarPublico(User $usuario)
 {
-    // Cargar sus obras y sus servicios activos
-    $obras = $usuario->obras()->latest()->get();
+    // Indicar explícitamente 'creado_en' a latest() o usar orderByDesc
+    $obras = $usuario->obras()->latest('creado_en')->get();
     $servicios = $usuario->servicios()->where('activo', true)->get();
 
     return view('perfil.publico', compact('usuario', 'obras', 'servicios'));
