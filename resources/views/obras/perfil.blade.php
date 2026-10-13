@@ -197,7 +197,10 @@
 
     <!-- Navbar -->
     <nav class="nav px-4 sm:px-6 py-3.5 flex justify-between items-center sticky top-0 z-50">
-        <a href="{{ route('obras.index') }}" class="logo text-xl">🎨 Galería Creativa</a>
+            <a href="{{ route('obras.index') }}" class="logo flex items-center overflow-hidden">
+        <!-- Controlamos el contenedor con h-12/h-14 y escalamos la imagen un 25% (scale-125) para rellenar el espacio -->
+        <img src="{{ asset('img/logo.png') }}" alt="Galería Creativa" class="h-12 w-auto md:h-14 object-contain invert transform scale-125 origin-left">
+    </a>
         <div class="flex items-center gap-2 sm:gap-3">
             <a href="{{ route('obras.index') }}" class="btn-ghost">Explorar</a>
             <a href="{{ route('pedidos.index') }}" class="btn-ghost">Contrataciones</a>

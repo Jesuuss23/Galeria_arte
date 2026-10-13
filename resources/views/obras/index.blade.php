@@ -240,10 +240,11 @@
     <div class="grain" aria-hidden="true"></div>
 
     <!-- Navbar -->
-    <nav class="nav px-4 sm:px-6 py-3.5 flex justify-between items-center sticky top-0 z-50">
-        <a href="{{ route('obras.index') }}" class="logo text-xl">
-            🎨 Galería Creativa
-        </a>
+<nav class="nav px-4 sm:px-6 py-3.5 flex justify-between items-center sticky top-0 z-50">
+    <a href="{{ route('obras.index') }}" class="logo flex items-center overflow-hidden">
+        <!-- Controlamos el contenedor con h-12/h-14 y escalamos la imagen un 25% (scale-125) para rellenar el espacio -->
+        <img src="{{ asset('img/logo.png') }}" alt="Galería Creativa" class="h-12 w-auto md:h-14 object-contain invert transform scale-125 origin-left">
+    </a>
 @if(auth()->check() && auth()->user()->es_admin)
     <a href="{{ route('admin.dashboard') }}" class="btn-ghost border-violet-500/40 text-violet-300">
         ⚡ Panel Admin
@@ -262,7 +263,7 @@
 
                 <!-- Botón Subir Arte -->
                 <a href="{{ route('obras.create') }}" class="btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://w3.org" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
                     <span>Subir mi arte</span>
@@ -272,7 +273,7 @@
                 <form method="POST" action="{{ route('logout') }}" class="inline">
                     @csrf
                     <button type="submit" class="btn-danger">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://w3.org" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
                         <span>Salir</span>
@@ -289,6 +290,7 @@
             @endauth
         </div>
     </nav>
+
 
     <!-- Contenido y Filtros -->
     <main class="relative z-10 max-w-7xl mx-auto px-4 py-10">
